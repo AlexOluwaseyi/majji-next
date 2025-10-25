@@ -18,6 +18,17 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "dist/",
+      "coverage/",
+      ".env*", // matches .env, .env.local, etc.
+      "public/",
+      "**/generated/",
+      "prisma/migrations/",
+      "*.config.js",
+      "*.config.ts",
+      "temp/",
+      "logs/",
+      "**/*.tsx",
     ],
   },
 ];

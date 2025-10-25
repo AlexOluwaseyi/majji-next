@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+enum Type {
+  buyer
+  seller
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  description  String   @db.Text
+  price        Float
+  image        String
+  category     String
+  rating       Float    @default(0)
+  downloads    Int      @default(0)
+  tags         String[] // Array of strings
+  licenseTypes String[] // Array of license types
+  featured     Boolean  @default(false)
+
+  // Seller relationship
+  sellerId String
+  seller   User   @relation("SellerProducts", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  purchases Purchase[]
+  reviews   Review[]
+
+  @@index([sellerId])
+  @@index([category])
+  @@index([featured])
+  @@index([createdAt])
+}
+
+model Review {
+  id      String  @id @default(cuid())
+  rating  Float
+  comment String? @db.Text
+
+  // Relations
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId]) // One review per user per product
+  @@index([productId])
+  @@index([userId])
+}
+
+model Purchase {
+  id          String @id @default(cuid())
+  licenseType String
+  price       Float
+
+  // Relations
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  buyerId String
+  buyer   User   @relation("BuyerPurchases", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  // Purchase details
+  transactionId String? @unique
+  status        String  @default("completed") // completed, pending, refunded
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([buyerId])
+  @@index([createdAt])
+}
+
+// Update your existing User model to include these relations
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  username String  @unique
+  image    String?
+  name     String
+  password String?
+  phone    String?
+  type     Type // "buyer" or "seller"
+  verified Boolean @default(false)
+  isAdmin  Boolean @default(false)
+
+  // Seller-specific fields
+  rating     Float? @default(0)
+  totalSales Int?   @default(0)
+
+  // Buyer-specific fields
+  company String?
+
+  // Relations
+  products  Product[]  @relation("SellerProducts")
+  purchases Purchase[] @relation("BuyerPurchases")
+  reviews   Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Account Account[]
+
+  @@index([email])
+  @@index([id])
+  @@index([username])
+  @@index([type])
+}

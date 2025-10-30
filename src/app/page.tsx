@@ -9,16 +9,18 @@ import ProductPage from "@/app/products/page";
 import DashboardPage from "@/app/dashboard/page";
 import AuthPage from "@/app/auth/page";
 import AddProductPage from "@/app/add-product/page";
-import { useUser } from "@/contexts/AuthContext";
-import { type Page, NavigationOptions, User } from "@/types";
+import { useUser, useSession } from "@/contexts/AuthContext";
+import { type Page, NavigationOptions } from "@/types";
 
-export default function Home() {
+export default async function Home() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null
   );
   const [currentSearchTerm, setCurrentSearchTerm] = useState<string>("");
-  const user = useUser();
+  const user = await useUser();
+
+  console.log("useSession data: ", await useSession());
 
   const handleNavigate = (options: string | NavigationOptions) => {
     if (typeof options === "string") {
@@ -40,6 +42,7 @@ export default function Home() {
   };
 
   const renderPage = () => {
+    console.log("Current Page:", currentPage);
     switch (currentPage) {
       case "home":
         return (
@@ -73,7 +76,7 @@ export default function Home() {
         return <AuthPage onNavigate={handleNavigate} />;
       case "add-product":
         return user ? (
-          <AddProductPage onNavigate={handleNavigate} />
+          <AddProductPage />
         ) : (
           <AuthPage onNavigate={handleNavigate} />
         );
@@ -89,8 +92,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header currentPage={currentPage} onNavigate={handleNavigate} />
-      {renderPage()}
+      {/* <Header currentPage={currentPage} /> */}
+      {/* {renderPage()} */}
+      <HomePage
+        onNavigate={handleNavigate}
+        onProductSelect={navigateToProduct}
+      />
     </div>
   );
 }

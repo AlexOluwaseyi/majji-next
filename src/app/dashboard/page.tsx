@@ -2,9 +2,12 @@
 
 import SellerDashboard from "@/components/SellerDashboard";
 import BuyerDashboard from "@/components/BuyerDashboard";
-import { NavigationOptions } from "@/types";
+import { NavigationOptions, type Page } from "@/types";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/contexts/AuthContext";
+import { useUser, useSession } from "@/contexts/AuthContext";
+import Header from "@/components/Header";
+import { useState } from "react";
+import Loading from "@/app/loading";
 
 interface DashboardPageProps {
   onNavigate: (options: NavigationOptions | string) => void;
@@ -12,9 +15,15 @@ interface DashboardPageProps {
 
 const DashboardPage = () => {
   const router = useRouter();
+  const { status } = useSession();
   const user = useUser();
 
+  if (status === "loading") {
+    return <Loading />;
+  }
+
   if (!user) {
+    router.push("/auth");
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -33,13 +42,16 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {user.type === "seller" ? (
-        <SellerDashboard user={user} />
-      ) : (
-        <BuyerDashboard user={user} />
-      )}
-    </div>
+    <>
+      <Header currentPage="dashboard" />
+      <div className="min-h-screen bg-gray-50">
+        {user.type === "seller" ? (
+          <SellerDashboard user={user} />
+        ) : (
+          <BuyerDashboard user={user} />
+        )}
+      </div>
+    </>
   );
 };
 

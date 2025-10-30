@@ -17,7 +17,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
     email: "",
     password: "",
     name: "",
-    type: "",
+    // type: "",
     company: "",
   });
   const [error, setError] = useState("");
@@ -35,27 +35,30 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
           redirect: false,
           email: formData.email.trim().toLowerCase(),
           password: formData.password.trim(),
-          type: formData.type,
+          type: userType,
         });
 
         if (res?.error) {
           // Handle different error types
           switch (res.error) {
             case "CredentialsSignin":
-              console.error("Invalid email or password");
+              console.error("Invalid email, password, or user type");
+              setError("Invalid email, password, or user type");
               break;
             case "AccessDenied":
               console.error("Access denied");
+              setError("Access denied");
               break;
             default:
               console.error("Login failed. Please try again.");
+              setError("Login failed. Please try again.");
           }
         } else {
           router.push("/dashboard");
         }
         return;
       } else {
-        const registrationRes = await fetch("/api/auth/signup", {
+        const registrationRes = await fetch("/api/v1/users", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -74,7 +77,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
           throw new Error(errorData.message || "Registration failed");
         }
       }
-      onNavigate("dashboard");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
@@ -108,7 +111,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setUserType("buyer")}
+                onClick={() => {
+                  setUserType("buyer");
+                }}
                 className={`p-3 rounded-lg border-2 transition-colors ${
                   userType === "buyer"
                     ? "border-indigo-500 bg-indigo-50 text-indigo-700"
@@ -120,7 +125,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
               </button>
               <button
                 type="button"
-                onClick={() => setUserType("seller")}
+                onClick={() => {
+                  setUserType("seller");
+                  // setFormData({ ...formData, type: "seller" });
+                }}
                 className={`p-3 rounded-lg border-2 transition-colors ${
                   userType === "seller"
                     ? "border-indigo-500 bg-indigo-50 text-indigo-700"
@@ -246,14 +254,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          {/* <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-600 mb-2">Demo credentials:</p>
             <div className="text-xs space-y-1">
               <div>Seller: sarah.dev@email.com</div>
               <div>Buyer: buyer@company.com</div>
               <div>Password: any password</div>
             </div>
-          </div>
+          </div> */}
 
           <div className="mt-6 text-center">
             <button

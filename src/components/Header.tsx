@@ -12,23 +12,29 @@ import {
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import CartModal from "./CartModal";
-import { NavigationOptions, User } from "@/types";
+import { NavigationOptions } from "@/types";
 import { useUser } from "@/contexts/AuthContext";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   currentPage: string;
-  onNavigate: (options: NavigationOptions | string) => void;
+  // handleNavigate: (options: NavigationOptions | string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
+const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const user = useUser();
+  const router = useRouter();
   const { getItemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const cartItemCount = getItemCount();
+
+  const handleNavigate = (path: string) => {
+    router.push(path);
+  };
 
   return (
     <>
@@ -38,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
             {/* Logo */}
             <div
               className="flex items-center space-x-2 cursor-pointer"
-              onClick={() => onNavigate("home")}
+              onClick={() => handleNavigate("/home")}
             >
               <Image
                 src="/Majji-removebg-preview.png"
@@ -52,9 +58,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
               <button
-                onClick={() => onNavigate("home")}
+                onClick={() => handleNavigate("/home")}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  currentPage === "home"
+                  currentPage === "/home"
                     ? "text-indigo-600 bg-indigo-50"
                     : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                 }`}
@@ -62,9 +68,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
                 Home
               </button>
               <button
-                onClick={() => onNavigate("browse")}
+                onClick={() => handleNavigate("/browse")}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  currentPage === "browse"
+                  currentPage === "/browse"
                     ? "text-indigo-600 bg-indigo-50"
                     : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                 }`}
@@ -73,9 +79,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
               </button>
               {user && (
                 <button
-                  onClick={() => onNavigate("dashboard")}
+                  onClick={() => handleNavigate("/dashboard")}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    currentPage === "dashboard"
+                    currentPage === "/dashboard"
                       ? "text-indigo-600 bg-indigo-50"
                       : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                   }`}
@@ -133,7 +139,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
                       </div>
                     </div>
                     <button
-                      onClick={async () => await signOut()}
+                      onClick={async () => {
+                        await signOut();
+                        router.push("/auth");
+                      }}
                       className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
                     >
                       Logout
@@ -141,7 +150,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
                   </div>
                 ) : (
                   <button
-                    onClick={() => onNavigate("auth")}
+                    onClick={() => handleNavigate("/auth")}
                     className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors btn-animate"
                   >
                     Sign In
@@ -170,11 +179,11 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
               <button
                 onClick={() => {
-                  onNavigate("home");
+                  handleNavigate("/home");
                   setIsMenuOpen(false);
                 }}
                 className={`block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors ${
-                  currentPage === "home"
+                  currentPage === "/home"
                     ? "text-indigo-600 bg-indigo-50"
                     : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                 }`}
@@ -183,7 +192,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
               </button>
               <button
                 onClick={() => {
-                  onNavigate("browse");
+                  handleNavigate("/browse");
                   setIsMenuOpen(false);
                 }}
                 className={`block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors ${
@@ -197,7 +206,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage, onNavigate }) => {
               {user && (
                 <button
                   onClick={() => {
-                    onNavigate("dashboard");
+                    handleNavigate("/dashboard");
                     setIsMenuOpen(false);
                   }}
                   className={`block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors ${

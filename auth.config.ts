@@ -1,17 +1,17 @@
-import type { NextAuthConfig } from 'next-auth';
 import NextAuth from "next-auth"
 import CredentialsProvider from 'next-auth/providers/credentials';
 import Google from "next-auth/providers/google"
 import bcrypt from 'bcryptjs';
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
+import { generateUsername } from "@/lib/utils";
+import type { NextAuthConfig } from "next-auth"
 
 declare module "next-auth" {
   interface User {
     id: string;
     email: string;
     name: string;
-    verified?: boolean;
+    verified: boolean;
     type: "buyer" | "seller";
     isAdmin: boolean;
     rating?: number;
@@ -22,7 +22,7 @@ declare module "next-auth" {
       id: string;
       email: string;
       name: string;
-      verified?: boolean
+      verified: boolean;
       type: "buyer" | "seller";
       image?: string
       isAdmin: boolean
@@ -35,11 +35,12 @@ declare module "next-auth" {
     email: string;
     name: string;
     type: "buyer" | "seller";
+    isAdmin: boolean;
+    rating?: number;
   }
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -51,22 +52,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password || !credentials?.type) {
-            return null
-          }
-
-          // Fetch user from database
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email as string,
-              type: credentials.type as "buyer" | "seller"
-            },
-          });
-
-          if (!user || !user.password) {
             return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(credentials.password as string, user.password);
+          // Fetch user from database by email only
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email as string,
+              type: credentials.type as "buyer" | "seller",
+            },
+          });
+
+          if (!user) {
+            return null;
+          }
+
+          if (!user.password) {
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password as string,
+            user.password
+          );
 
           if (!isPasswordValid) {
             return null;
@@ -76,14 +84,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             id: user.id,
             email: user.email,
             name: user.name || '',
-            emailVerified: user.verified,
+            verified: user.verified,
             isAdmin: user.isAdmin,
-            type: user.type,
-            rating: user.rating as number,
+            type: user.type as "buyer" | "seller",
+            rating: user.rating || undefined,
           };
         } catch (error) {
           console.error('Error during authorization:', error);
-          throw new Error("Authorization failed");
+          return null;
         }
       },
     }),
@@ -109,7 +117,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       try {
         if (user) {
           token.id = user.id;
@@ -117,35 +125,62 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.name = user.name;
           token.isAdmin = user.isAdmin;
           token.type = user.type;
+          token.rating = user.rating;
+        }
+
+        // Handle session updates
+        if (trigger === "update" && session) {
+          token = { ...token, ...session };
         }
 
         return token;
 
       } catch (error) {
         console.error('Error in JWT callback:', error);
-        throw new Error("Token processing error");
+        return token;
       }
     },
 
     async session({ session, token }) {
       try {
-        if (session.user) {
+        if (session.user && token) {
           session.user.id = token.id as string;
           session.user.name = token.name as string;
           session.user.email = token.email as string;
           session.user.isAdmin = token.isAdmin as boolean;
           session.user.type = token.type as "buyer" | "seller";
+          session.user.rating = token.rating as number | undefined;
         }
         return session;
       } catch (error) {
         console.error('Error in session callback:', error);
-        throw new Error("Session processing error");
+        return session;
       }
     },
 
-    async signIn({ account, profile }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
-        return profile?.email_verified === true;
+        // Check if user exists, if not create them
+        if (profile?.email) {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: profile.email }
+          });
+
+          if (!existingUser) {
+            // Create new user with default type as buyer
+            await prisma.user.create({
+              data: {
+                email: profile.email,
+                name: profile.name || "",
+                // verified: profile.verified || false,
+                username: generateUsername(profile.email),
+                type: "buyer", // Default type for OAuth users
+                isAdmin: false,
+              }
+            });
+          }
+        }
+        return user?.verified === true;
       }
       return true;
     },
@@ -159,7 +194,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   pages: {
     signIn: "/auth/login",
-    signOut: "/auth/signout",
     error: "/auth/error",
   },
 } satisfies NextAuthConfig);

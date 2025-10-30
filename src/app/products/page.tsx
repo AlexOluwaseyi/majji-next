@@ -17,6 +17,7 @@ import { mockProducts } from "@/data/mockData";
 import { useCart, CartProvider } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { NavigationOptions, ProductPageProps } from "@/types";
+import Header from "@/components/Header";
 
 const ProductPage: React.FC<ProductPageProps> = ({ productId, onNavigate }) => {
   const [selectedLicense, setSelectedLicense] = useState("Standard");
@@ -71,6 +72,8 @@ const ProductPage: React.FC<ProductPageProps> = ({ productId, onNavigate }) => {
   ];
 
   return (
+    <>
+      <Header currentPage="dashboard" />
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb */}
         <div className="bg-white border-b border-gray-200">
@@ -512,6 +515,7 @@ yarn add react-dashboard-pro`}
           </div>
         </div>
       </div>
+    </>
   );
 };
 

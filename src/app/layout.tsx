@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { auth } from "~/auth.config";
+import { Providers as SessionProviders } from "@/contexts/SessionContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,14 +27,17 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CartProvider>
-          <AuthProvider session={session}>{children}</AuthProvider>
-        </CartProvider>
+        <SessionProviders session={session}>
+          <CartProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </CartProvider>
+        </SessionProviders>
       </body>
     </html>
   );

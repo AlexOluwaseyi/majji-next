@@ -122,7 +122,7 @@ model User {
   name     String
   password String?
   phone    String?
-  type     Type // "buyer" or "seller"
+  type     Type    @default(buyer)
   verified Boolean @default(false)
   isAdmin  Boolean @default(false)
 

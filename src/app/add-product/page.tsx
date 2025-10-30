@@ -16,12 +16,13 @@ import {
   Loader2,
 } from "lucide-react";
 import { NavigationOptions } from "@/types";
+import { useRouter } from "next/navigation";
 
-interface AddProductPageProps {
-  onNavigate: (options: NavigationOptions | string) => void;
-}
+// interface AddProductPageProps {
+//   router.push: /(options: NavigationOptions | string) => void;
+// }
 
-const AddProductPage: React.FC<AddProductPageProps> = ({ onNavigate }) => {
+const AddProductPage = () => {
   // File upload constants
   const MAX_FILE_SIZE_MB = 10;
   const MAX_FILES = 10;
@@ -39,6 +40,7 @@ const AddProductPage: React.FC<AddProductPageProps> = ({ onNavigate }) => {
 
   // File input reference
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -240,7 +242,7 @@ const AddProductPage: React.FC<AddProductPageProps> = ({ onNavigate }) => {
       alert(
         "Product added successfully! It will be reviewed and published within 24 hours."
       );
-      onNavigate("dashboard");
+      router.push("/dashboard");
     } catch (error) {
       alert("Failed to add product. Please try again.");
     } finally {
@@ -286,7 +288,7 @@ const AddProductPage: React.FC<AddProductPageProps> = ({ onNavigate }) => {
       <div className="bg-bg-white border-b border-border-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
-            onClick={() => onNavigate("dashboard")}
+            onClick={() => router.push("/dashboard")}
             className="flex items-center space-x-2 text-primary-action hover:text-primary-action-dark transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -837,7 +839,7 @@ const AddProductPage: React.FC<AddProductPageProps> = ({ onNavigate }) => {
           <div className="flex flex-col sm:flex-row gap-4 justify-end">
             <button
               type="button"
-              onClick={() => onNavigate("dashboard")}
+              onClick={() => router.push("/dashboard")}
               className="px-6 py-3 border border-border-medium text-text-dark rounded-lg hover:bg-bg-light transition-colors"
             >
               Cancel

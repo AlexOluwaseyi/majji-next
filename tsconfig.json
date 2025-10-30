@@ -29,6 +29,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/pages/AddProductPage"
-  ],
+, "src/auth.tssssss"  ],
   "exclude": ["node_modules"]
 }

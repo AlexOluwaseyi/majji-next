@@ -16,7 +16,7 @@ import { NavigationOptions } from "@/types";
 import { useUser } from "@/contexts/AuthContext";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 interface HeaderProps {
   currentPage: string;
@@ -36,6 +36,10 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
     router.push(path);
   };
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, redirectTo: "/" });
+  };
+
   return (
     <>
       <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-40">
@@ -44,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
             {/* Logo */}
             <div
               className="flex items-center space-x-2 cursor-pointer"
-              onClick={() => handleNavigate("/home")}
+              onClick={() => handleNavigate("/")}
             >
               <Image
                 src="/Majji-removebg-preview.png"
@@ -58,9 +62,9 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-8">
               <button
-                onClick={() => handleNavigate("/home")}
+                onClick={() => handleNavigate("/")}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  currentPage === "/home"
+                  currentPage === "/"
                     ? "text-indigo-600 bg-indigo-50"
                     : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                 }`}
@@ -139,10 +143,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
                       </div>
                     </div>
                     <button
-                      onClick={async () => {
-                        await signOut();
-                        router.push("/auth");
-                      }}
+                      onClick={async () => await handleSignOut()}
                       className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
                     >
                       Logout
@@ -179,11 +180,11 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
               <button
                 onClick={() => {
-                  handleNavigate("/home");
+                  handleNavigate("/");
                   setIsMenuOpen(false);
                 }}
                 className={`block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors ${
-                  currentPage === "/home"
+                  currentPage === "/"
                     ? "text-indigo-600 bg-indigo-50"
                     : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50"
                 }`}

@@ -9,9 +9,6 @@ import Header from "@/components/Header";
 import { useState } from "react";
 import Loading from "@/app/loading";
 
-interface DashboardPageProps {
-  onNavigate: (options: NavigationOptions | string) => void;
-}
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -23,7 +20,6 @@ const DashboardPage = () => {
   }
 
   if (!user) {
-    router.push("/auth");
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -42,16 +38,13 @@ const DashboardPage = () => {
   }
 
   return (
-    <>
-      <Header currentPage="dashboard" />
-      <div className="min-h-screen bg-gray-50">
-        {user.type === "seller" ? (
-          <SellerDashboard user={user} />
-        ) : (
-          <BuyerDashboard user={user} />
-        )}
-      </div>
-    </>
+    <div className="min-h-screen bg-gray-50">
+      {user.type === "seller" ? (
+        <SellerDashboard user={user} />
+      ) : (
+        <BuyerDashboard user={user} />
+      )}
+    </div>
   );
 };
 

@@ -12,11 +12,10 @@ import {
 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import CartModal from "./CartModal";
-import { NavigationOptions } from "@/types";
 import { useUser } from "@/contexts/AuthContext";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   currentPage: string;
@@ -39,8 +38,8 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const handleSignOut = async () => {
     await signOut({
       redirect: true,
-      redirectTo: "/",
-      callbackUrl: "/",
+      redirectTo: "/product",
+      callbackUrl: "/dashboard",
     });
   };
 

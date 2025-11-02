@@ -37,7 +37,11 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   };
 
   const handleSignOut = async () => {
-    await signOut({ redirect: true, redirectTo: "/" });
+    await signOut({
+      redirect: true,
+      redirectTo: "/",
+      callbackUrl: "/",
+    });
   };
 
   return (

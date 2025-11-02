@@ -193,7 +193,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
   pages: {
-    signIn: "/auth/login",
-    error: "/auth/error",
+    signIn: "/auth",
   },
 } satisfies NextAuthConfig);

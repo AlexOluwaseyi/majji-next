@@ -5,6 +5,7 @@ import { Code, Mail, Lock, User, Building, Loader2 } from "lucide-react";
 import { NavigationOptions } from "@/types";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { GoogleSignIn } from "@/components/google-signin";
 
 interface AuthPageProps {
   onNavigate: (options: NavigationOptions | string) => void;
@@ -80,6 +81,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Google auth sign-in
+  const handleGoogleAuth = async () => {
+    try {
+      setIsLoading(true);
+      await signIn("google", { callbackUrl: "/dashboard" });
+    } catch (err) {
+      console.error("Google sign-in failed:", err);
     } finally {
       setIsLoading(false);
     }
@@ -262,6 +275,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
               <div>Password: any password</div>
             </div>
           </div> */}
+
+          <div className="my-6 flex items-center">
+            <div className="flex-1 border-t border-slate-600"></div>
+            <span className="px-4 text-slate-400 text-sm">OR</span>
+            <div className="flex-1 border-t border-slate-600"></div>
+          </div>
+
+          <GoogleSignIn
+            onClickAction={handleGoogleAuth}
+            isLoading={isLoading}
+          />
 
           <div className="mt-6 text-center">
             <button

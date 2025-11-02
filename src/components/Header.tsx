@@ -29,6 +29,8 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+
   const cartItemCount = getItemCount();
 
   const handleNavigate = (path: string) => {
@@ -38,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ currentPage }) => {
   const handleSignOut = async () => {
     await signOut({
       redirect: true,
-      redirectTo: "/",
+      redirectTo: `${baseUrl}`,
     });
   };
 

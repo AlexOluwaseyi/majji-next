@@ -180,7 +180,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             });
           }
         }
-        return user?.verified === true;
+        // return user?.verified === true;
       }
       return true;
     },
